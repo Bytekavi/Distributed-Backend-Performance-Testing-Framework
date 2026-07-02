@@ -1,0 +1,41 @@
+{
+  "test": {
+    "id": "c3516fe8-a787-459d-ad48-cfb38a83de7f",
+    "name": "10000-connection distributed run",
+    "target_host": "demo-target",
+    "target_port": 80,
+    "target_path": "/",
+    "concurrent_connections": 10000,
+    "duration_seconds": 60,
+    "expected_workers": 2,
+    "received_workers": 2,
+    "status": "completed",
+    "created_at": "2025-03-14T10:00:00Z",
+    "completed_at": "2025-03-14T10:01:03Z"
+  },
+  "total_requests": 485210,
+  "successful_requests": 484921,
+  "failed_requests": 289,
+  "requests_per_second": 8086.83,
+  "average_latency_ms": 22.41,
+  "p95_latency_ms": 50.0,
+  "p99_latency_ms": 100.0,
+  "error_rate": 0.06,
+  "latency_histogram": {
+    "1": 1250,
+    "2": 8310,
+    "5": 48222,
+    "10": 120603,
+    "20": 167112,
+    "50": 112220,
+    "100": 25481,
+    "200": 1382,
+    "500": 312,
+    "1000": 21,
+    "2000": 6,
+    "5000": 2,
+    "10000": 0,
+    "+Inf": 0
+  }
+}
+

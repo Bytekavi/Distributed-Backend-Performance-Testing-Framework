@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y docker.io
+systemctl enable --now docker
+
+docker run -d \
+  --name distributed-performance-worker \
+  --restart unless-stopped \
+  --ulimit nofile=65536:65536 \
+  -e REDIS_HOST="${redis_host}" \
+  -e REDIS_PORT="${redis_port}" \
+  -e REDIS_PASSWORD="${redis_password}" \
+  -e API_BASE_URL="${api_base_url}" \
+  -e WORKER_THREADS="${worker_threads}" \
+  -e WORKER_NODE_ID="${node_id}" \
+  "${worker_image}"
+

@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: Distributed Performance Framework
+    orgId: 1
+    folder: Performance
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards
+

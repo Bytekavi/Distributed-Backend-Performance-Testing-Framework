@@ -1,0 +1,15 @@
+aws_region    = "ap-south-1"
+vpc_id       = "vpc-0123456789abcdef0"
+subnet_ids   = ["subnet-0123456789abcdef0", "subnet-0fedcba9876543210"]
+ami_id       = "ami-0123456789abcdef0"
+instance_type = "c7i.large"
+worker_count  = 2
+worker_image  = "123456789012.dkr.ecr.ap-south-1.amazonaws.com/performance-worker:1.0.0"
+redis_host    = "redis.internal.example"
+api_base_url  = "https://performance-api.internal.example"
+
+tags = {
+  Environment = "performance"
+  Owner       = "platform-engineering"
+}
+

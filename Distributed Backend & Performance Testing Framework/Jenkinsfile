@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    environment {
+        COMPOSE_PROJECT_NAME = "performance-${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Validate') {
+            parallel {
+                stage('Python') {
+                    steps {
+                        sh 'python3 -m compileall -q api/app api/tests'
+                        sh 'python3 -m unittest discover -s api/tests -v'
+                    }
+                }
+                stage('Java') {
+                    steps {
+                        sh 'mvn -B -f worker-java/pom.xml verify'
+                    }
+                }
+                stage('C++') {
+                    steps {
+                        sh 'cmake -S load-generator-cpp -B build -DCMAKE_BUILD_TYPE=Release'
+                        sh 'cmake --build build --parallel'
+                    }
+                }
+                stage('Infrastructure') {
+                    steps {
+                        sh 'terraform -chdir=infra/terraform fmt -check -recursive'
+                        sh 'cp .env.example .env'
+                        sh 'docker compose config --quiet'
+                    }
+                }
+            }
+        }
+
+        stage('Build Images') {
+            steps {
+                sh 'docker compose build api worker'
+            }
+        }
+
+        stage('Integration Test') {
+            steps {
+                sh 'docker compose up -d mysql redis demo-target api'
+                sh '''
+                    for attempt in $(seq 1 30); do
+                      if curl -fsS http://localhost:8000/readyz; then
+                        exit 0
+                      fi
+                      sleep 2
+                    done
+                    exit 1
+                '''
+                sh 'curl -fsS http://localhost:8000/openapi.json > openapi.json'
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker compose logs --no-color > compose.log || true'
+            archiveArtifacts artifacts: 'compose.log,openapi.json', allowEmptyArchive: true
+            sh 'docker compose down -v --remove-orphans || true'
+            junit testResults: 'worker-java/target/surefire-reports/*.xml', allowEmptyResults: true
+        }
+    }
+}
+
